@@ -1,15 +1,18 @@
 # Ubuntu 虚拟机安装 OpenClaw 完整流程
 
-本教程适用于在 Ubuntu 虚拟机环境下，通过官方脚本和 Opencode 工具部署 OpenClaw。
+本教程适用于在 Ubuntu 虚拟机环境下，通过官方脚本部署 OpenClaw。
+
+> **注意**：新版 OpenClaw（2026.1.24+）使用配置向导，**无需手动设置模型**，向导会自动识别并配置可用模型。
 
 ## 目录
 
 - [1. 基础环境配置（免密设置）](#1-基础环境配置免密设置)
 - [2. 安装基础工具与 OpenSSH](#2-安装基础工具与-openssh)
-- [3. 安装 Opencode 工具](#3-安装-opencode-工具)
-- [4. 安装 OpenClaw (官方脚本)](#4-安装-openclaw-官方脚本)
-- [5. 调用教程完成后续配置](#5-调用教程完成后续配置)
-- [6. 浏览器扩展安装](#6-浏览器扩展安装)
+- [3. 安装 OpenClaw (官方脚本)](#3-安装-openclaw-官方脚本)
+- [4. 配置向导](#4-配置向导)
+- [5. 国内 API 配置](#5-国内-api-配置)
+- [6. 局域网访问配置](#6-局域网访问配置)
+- [7. 浏览器扩展安装](#7-浏览器扩展安装)
 
 ---
 
@@ -74,27 +77,7 @@ ip addr show | grep -E "inet " | awk '{print $2}' | cut -d'/' -f1 | grep -v "^12
 
 ---
 
-## 3. 安装 Opencode 工具
-
-Opencode 用于简化后续的复杂配置过程。
-
-```bash
-curl -fsSL https://opencode.ai/install | bash
-```
-
-### 3.1 验证安装
-
-```bash
-# 检查 Opencode 是否安装成功
-which opencode
-
-# 查看版本
-opencode --version
-```
-
----
-
-## 4. 安装 OpenClaw (官方脚本)
+## 3. 安装 OpenClaw (官方脚本)
 
 使用官方提供的一键安装脚本进行部署：
 
@@ -102,19 +85,25 @@ opencode --version
 curl -fsSL https://molt.bot/install.sh | bash
 ```
 
-### 4.1 运行初始化向导
+---
 
-安装完成后，运行初始化向导完成基本配置：
+## 4. 配置向导
+
+运行配置向导完成基本设置（推荐）：
 
 ```bash
 openclaw onboard --install-daemon
 ```
 
+### 4.1 向导配置选项
+
 按照向导提示完成配置：
-- 选择安全选项（理解风险）
-- 配置工作区目录
-- 设置 Gateway 认证方式
-- 其他基本配置
+
+1. **选择安全选项** - 理解风险
+2. **配置工作区目录** - 设置工作文件存放位置
+3. **配置国内 API**（可选）- 选择 MiniMax 或智谱，输入 API Key
+4. **配置局域网访问**（可选）- 开启 LAN Access
+5. **设置认证方式** - Token 认证
 
 ### 4.2 验证安装
 
@@ -131,60 +120,84 @@ openclaw gateway status
 
 ---
 
-## 5. 调用教程完成后续配置
+## 5. 国内 API 配置
 
-利用 Opencode 加载司波图团队整理的专用教程，引导完成后续的模型配置和局域网访问设置。
+> **与旧版教程的区别**：新版 OpenClaw 向导会自动识别并配置模型，**无需手动编辑配置文件**。
 
-### 5.1 教程地址
-
-```
-https://github.com/spoto-team/openclaw-minimax-guide
-```
-
-### 5.2 执行命令
-
-在终端输入以下命令：
+### 5.1 使用向导配置（推荐）
 
 ```bash
-opencode run https://github.com/spoto-team/openclaw-minimax-guide
+openclaw onboard
 ```
 
-### 5.3 后续配置内容
+选择对应 API 服务商，输入 API Key 即可。
 
-该教程将引导你完成以下配置：
+### 5.2 API Key 获取
 
-#### 5.3.1 国内 API 配置
+| 服务商 | 地址 |
+|--------|------|
+| MiniMax | https://www.minimaxi.com → 控制台 → API Keys |
+| 智谱 AI | https://bigmodel.cn → 控制台 → API Keys |
 
-- 配置 MiniMax 国内版 API（推荐）
-- 配置智谱 GLM-4.7 API
-- 获取 API Key
-- 编辑配置文件
+### 5.3 验证模型
 
-**相关文档**：[OpenClaw 国内 API 替换配置指南](./OPENCLAW-CN-API-GUIDE.md)
-
-#### 5.3.2 局域网访问配置
-
-- 配置 Gateway 支持局域网访问
-- 获取 Web UI 访问地址
-- 获取登录 Token
-- 配置 HTTP 安全访问
-
-**相关文档**：[OpenClaw 局域网访问配置指南](./OPENCLAW-LAN-ACCESS-GUIDE.md)
-
-### 5.4 完成配置
-
-请根据屏幕提示完成以下步骤：
-
-1. ✅ 获取并配置 API Key
-2. ✅ 编辑配置文件 `~/.openclaw/openclaw.json`
-3. ✅ 重启 Gateway
-4. ✅ 验证模型配置
-5. ✅ 配置局域网访问（如需要）
-6. ✅ 登录 Web UI 验证
+```bash
+openclaw models list
+```
 
 ---
 
-## 6. 浏览器扩展安装
+## 6. 局域网访问配置
+
+> **注意**：配置向导可以开启局域网访问，但 **无法直接配置 controlUi**，需要手动添加。
+
+### 6.1 使用向导开启局域网
+
+```bash
+openclaw onboard
+```
+
+选择 `Enable LAN Access` 或类似选项。
+
+### 6.2 手动添加 controlUi 配置
+
+向导设置后，需手动编辑配置文件：
+
+```bash
+nano ~/.openclaw/openclaw.json
+```
+
+在 gateway 配置中添加：
+
+```json
+"controlUi": {
+  "dangerouslyAllowHostHeaderOriginFallback": true,
+  "allowInsecureAuth": true,
+  "dangerouslyDisableDeviceAuth": true
+}
+```
+
+### 6.3 重启 Gateway
+
+```bash
+openclaw gateway restart
+```
+
+### 6.4 获取访问信息
+
+```bash
+# 获取局域网 IP
+ip addr show | grep -E "inet " | awk '{print $2}' | cut -d'/' -f1 | grep -v "^127"
+
+# 获取 Token
+grep '"token"' ~/.openclaw/openclaw.json
+```
+
+访问地址：`http://<你的局域网IP>:18789/`
+
+---
+
+## 7. 浏览器扩展安装
 
 如需在 OpenClaw 中调用浏览器功能，请在终端执行扩展安装命令：
 
@@ -192,7 +205,7 @@ opencode run https://github.com/spoto-team/openclaw-minimax-guide
 openclaw browser extension install
 ```
 
-### 6.1 验证浏览器扩展
+### 7.1 验证浏览器扩展
 
 ```bash
 # 检查浏览器扩展状态
@@ -259,19 +272,29 @@ visudo
    tail -f ~/.openclaw/logs/gateway.log
    ```
 
-### Q4: Opencode 教程加载失败
+### Q4: 向导找不到
 
-**问题**：无法加载外部教程
+**问题**：`openclaw onboard` 命令不存在
 
 **解决方案**：
 
-1. 检查网络连接
-2. 手动克隆教程仓库：
-   ```bash
-   git clone https://github.com/spoto-team/openclaw-minimax-guide.git
-   cd openclaw-minimax-guide
-   ```
-3. 按照本地文档完成配置
+```bash
+openclaw --version
+# 确保版本 ≥ 2026.1.24
+
+# 如需更新
+openclaw update
+```
+
+### Q5: 局域网无法访问
+
+**问题**：其他设备无法访问 Web UI
+
+**解决方案**：
+
+1. 确认已按 6.2 节添加 controlUi 配置
+2. 检查防火墙：`sudo ufw allow 18789/tcp`
+3. 重启 Gateway：`openclaw gateway restart`
 
 ---
 
@@ -290,7 +313,6 @@ visudo
 - [OpenClaw GitHub](https://github.com/openclaw/openclaw)
 - [MiniMax 官网](https://www.minimaxi.com)
 - [智谱 AI 官网](https://bigmodel.cn)
-- [Opencode 官网](https://opencode.ai)
 
 ---
 
@@ -300,11 +322,8 @@ MIT License - 详见 [LICENSE](./LICENSE) 文件
 
 ---
 
-## 版本信息
+## 版本
 
-- 文档版本: 1.0
-- 创建日期: 2026-01-29
+- 更新日期: 2026-03-02
 - 适用系统: Ubuntu 20.04/22.04
-- 支持的 OpenClaw 版本: 2026.1.24-3+
-
-**注意**：请妥善保管您的 API Key、Token 和虚拟机访问凭证，定期检查系统安全。
+- 支持的 OpenClaw 版本: 2026.1.24+
