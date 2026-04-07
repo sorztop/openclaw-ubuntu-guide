@@ -82,7 +82,7 @@ ip addr show | grep -E "inet " | awk '{print $2}' | cut -d'/' -f1 | grep -v "^12
 使用官方提供的一键安装脚本进行部署：
 
 ```bash
---curl -fsSL https://molt.bot/install.sh | bash
+-- 不再使用curl -fsSL https://molt.bot/install.sh | bash
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
